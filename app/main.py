@@ -33,4 +33,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {
+        "service": "ChunkForge API",
+        "status": "ok",
+        "message": "La API está funcionando correctamente.",
+        "version": "0.1.0",
+        "docs": "/docs",
+        "api": "/api/v1",
+    }
+
+
 app.include_router(api_router, prefix="/api/v1")
