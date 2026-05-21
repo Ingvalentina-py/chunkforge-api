@@ -23,16 +23,17 @@ class Settings(BaseSettings):
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     )
 
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5173,http://8.233.222.241"
 
     @property
     def cors_origins_list(self) -> list[str]:
+        default_origins = ["http://localhost:5173", "http://8.233.222.241"]
         origins = [
             origin.strip().rstrip("/")
             for origin in self.cors_origins.split(",")
             if origin.strip()
         ]
-        return origins or ["http://localhost:5173"]
+        return origins or default_origins
 
 
 @lru_cache
