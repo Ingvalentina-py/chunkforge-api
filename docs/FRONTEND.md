@@ -558,20 +558,19 @@ export interface EmbedDocumentResponse {
 
 ---
 
-## 8. CORS (si el front corre en otro puerto)
+## 8. CORS
 
-El backend FastAPI puede necesitar CORS para `http://localhost:5173` (Vite) o `http://localhost:3000` (Next.js). Si hay errores de red en el navegador, pedir al equipo backend añadir:
+El backend ya expone CORS configurable por `.env`:
 
-```python
-# app/main.py (si aún no está)
-from fastapi.middleware.cors import CORSMiddleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+```env
+# Un origen
+CORS_ORIGINS=http://localhost:5173
+
+# Varios orígenes (separados por coma)
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
+
+Default si no se define: `http://localhost:5173`. Tras cambiar `.env`, reinicia uvicorn.
 
 ---
 

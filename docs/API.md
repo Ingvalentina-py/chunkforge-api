@@ -45,6 +45,7 @@ sequenceDiagram
 | `EMBEDDING_MODEL` | No | Modelo sentence-transformers (default: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`) |
 | `MAX_UPLOAD_BYTES` | No | Tamaño máximo de archivo (default: 10 MB) |
 | `MAX_CHARS_PER_SEGMENT` | No | Umbral para dividir documentos largos (default: 30000) |
+| `CORS_ORIGINS` | No | Orígenes permitidos, separados por coma (default: `http://localhost:5173`) |
 
 ---
 
