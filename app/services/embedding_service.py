@@ -7,6 +7,8 @@ from app.core.config import get_settings
 from app.schemas.embeddings import (
     EmbedDocumentRequest,
     EmbedDocumentResponse,
+    EmbedTextRequest,
+    EmbedTextResponse,
     VectorPayloadSchema,
     VectorResultSchema,
 )
@@ -38,11 +40,11 @@ class EmbeddingService:
             return await asyncio.to_thread(cls._load_model)
 
     @classmethod
-    def _validate_embedding_model(cls, request: EmbedDocumentRequest) -> None:
+    def _validate_embedding_model_name(cls, embedding_model: str | None) -> None:
         settings = get_settings()
         if (
-            request.embedding_model is not None
-            and request.embedding_model != settings.embedding_model
+            embedding_model is not None
+            and embedding_model != settings.embedding_model
         ):
             raise HTTPException(
                 status_code=422,
@@ -59,12 +61,42 @@ class EmbeddingService:
         return [vector.tolist() for vector in embeddings]
 
     @classmethod
+    async def embed_text(cls, request: EmbedTextRequest) -> EmbedTextResponse:
+        cls._validate_embedding_model_name(request.embedding_model)
+
+        try:
+            model = await cls._get_model()
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail=f"No se pudo cargar el modelo de embeddings: {exc}",
+            ) from exc
+
+        text = request.text.strip()
+
+        try:
+            vectors = await asyncio.to_thread(cls._encode, [text])
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error al generar embeddings: {exc}",
+            ) from exc
+
+        settings = get_settings()
+        return EmbedTextResponse(
+            embedding_model=settings.embedding_model,
+            dimensions=model.get_sentence_embedding_dimension(),
+            text=text,
+            vector=vectors[0],
+        )
+
+    @classmethod
     async def embed_document(
         cls,
         document_id: str,
         request: EmbedDocumentRequest,
     ) -> EmbedDocumentResponse:
-        cls._validate_embedding_model(request)
+        cls._validate_embedding_model_name(request.embedding_model)
 
         try:
             model = await cls._get_model()

@@ -4,7 +4,7 @@ Documentación orientada al desarrollo de la aplicación web que consume **Chunk
 
 **API base (desarrollo):** `http://localhost:8000`  
 **Prefijo:** `/api/v1`  
-**Referencia técnica backend:** [API.md](./API.md) · [Swagger](http://localhost:8000/docs)
+**Documentación de endpoints (canónica):** [ENDPOINTS.md](./ENDPOINTS.md) · [Swagger](http://localhost:8000/docs)
 
 ---
 
@@ -56,6 +56,8 @@ flowchart LR
 | F6 | **Generación de embeddings** | Llamar a `POST /documents/{id}/embeddings` con chunks aprobados. |
 | F7 | **Resultado de embeddings** | Mostrar resumen (`dimensions`, `total_chunks`) y opción de descargar JSON. |
 | F8 | **Manejo de errores** | Mensajes claros según código HTTP (400, 413, 422, 502, 500). |
+
+**Opcional (búsqueda / utilidad):** `POST /api/v1/embed` — embeber una sola oración (consulta del usuario en chat RAG, pruebas). Ver [ENDPOINTS.md § Endpoint 3](./ENDPOINTS.md#endpoint-3--embed-texto-oración).
 
 ### 2.2 Recomendada (mejor UX)
 
@@ -269,12 +271,15 @@ Pantalla intermedia o overlay mientras corre `POST /embeddings`:
 
 ## 5. Endpoints a consumir
 
+Documentación completa: **[ENDPOINTS.md](./ENDPOINTS.md)**.
+
 ### Resumen
 
-| Paso | Método | URL | Content-Type |
-|------|--------|-----|--------------|
-| Preparar | `POST` | `/api/v1/documents/prepare` | `multipart/form-data` |
-| Embeddings | `POST` | `/api/v1/documents/{document_id}/embeddings` | `application/json` |
+| Uso | Método | URL | Content-Type |
+|-----|--------|-----|--------------|
+| Preparar documento | `POST` | `/api/v1/documents/prepare` | `multipart/form-data` |
+| Embeddings (chunks) | `POST` | `/api/v1/documents/{document_id}/embeddings` | `application/json` |
+| Embed una oración | `POST` | `/api/v1/embed` | `application/json` |
 
 ### Variable de entorno en el front
 
@@ -465,6 +470,47 @@ interface EmbedDocumentResponse {
 
 ---
 
+### 5.3 POST `/embed` (una oración)
+
+**Cuándo:** búsqueda en vivo (embedder la pregunta del usuario), pruebas, o utilidad sin flujo prepare.
+
+**Request:**
+
+```typescript
+interface EmbedTextRequest {
+  text: string;
+  embedding_model?: string; // omitir en v1
+}
+
+interface EmbedTextResponse {
+  embedding_model: string;
+  dimensions: number;
+  text: string;
+  vector: number[];
+}
+```
+
+**Ejemplo fetch:**
+
+```typescript
+async function embedSentence(text: string): Promise<EmbedTextResponse> {
+  const res = await fetch(`${API_BASE}/api/v1/embed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? res.statusText);
+  }
+  return res.json();
+}
+```
+
+Usa el `vector` devuelto para comparar por similitud coseno contra vectores ya indexados en tu vector DB.
+
+---
+
 ## 6. Modelo de estado recomendado (React)
 
 ```typescript
@@ -623,6 +669,7 @@ No usar timeout de fetch menor a **120 s** en prepare.
 
 ## 12. Referencias
 
-- [API.md](./API.md) — contrato HTTP detallado
+- [ENDPOINTS.md](./ENDPOINTS.md) — documentación canónica de los 3 endpoints
+- [API.md](./API.md) — índice y enlaces rápidos
 - [postman/ChunkForge-API.postman_collection.json](../postman/ChunkForge-API.postman_collection.json) — ejemplos ejecutables
 - OpenAPI en vivo: `GET /openapi.json` — generar cliente con Orval/OpenAPI Generator si se desea

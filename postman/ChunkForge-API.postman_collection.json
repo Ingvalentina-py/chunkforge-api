@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "chunkforge-api-collection",
     "name": "ChunkForge API",
-    "description": "Colección para probar ChunkForge API: preparación de documentos y generación de embeddings.\n\n**Flujo:**\n1. Ejecutar Prepare (file o text)\n2. Copiar `document_id` de la respuesta a la variable de entorno `document_id`\n3. Ajustar el body de Generate Embeddings con los chunks editados\n4. Ejecutar Generate Embeddings",
+    "description": "Colección para probar ChunkForge API.\n\n**Flujo documentos:**\n1. Prepare (file o text)\n2. Generate Embeddings con document_id\n\n**Embed directo:**\n- Embed Text (sentence) — POST /api/v1/embed\n\nVer docs/ENDPOINTS.md",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -152,6 +152,39 @@
               "path": ["api", "v1", "documents", "{{document_id}}", "embeddings"]
             },
             "description": "Genera embeddings locales (384 dimensiones) para chunks aprobados.\n\nRequiere `document_id` de un prepare previo (se auto-guarda si usaste los requests Prepare con tests habilitados).\n\nEdita `chunks` con los textos finales del frontend."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Embed",
+      "item": [
+        {
+          "name": "Embed Text (sentence)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Horario de atención de lunes a sábado de 8 AM a 10 PM.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/embed",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "embed"]
+            },
+            "description": "Convierte una oración en un vector (384 dimensiones). No requiere document_id ni flujo prepare."
           },
           "response": []
         }

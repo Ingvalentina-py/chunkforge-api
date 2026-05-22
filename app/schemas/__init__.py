@@ -7,6 +7,8 @@ from app.schemas.documents import (
 from app.schemas.embeddings import (
     EmbedDocumentRequest,
     EmbedDocumentResponse,
+    EmbedTextRequest,
+    EmbedTextResponse,
 )
 
 __all__ = [
@@ -16,4 +18,6 @@ __all__ = [
     "PreparationMode",
     "EmbedDocumentRequest",
     "EmbedDocumentResponse",
+    "EmbedTextRequest",
+    "EmbedTextResponse",
 ]

@@ -52,3 +52,22 @@ class EmbedDocumentResponse(BaseModel):
     dimensions: int
     total_chunks: int
     vectors: list[VectorResultSchema]
+
+
+class EmbedTextRequest(BaseModel):
+    text: str
+    embedding_model: str | None = None
+
+    @field_validator("text")
+    @classmethod
+    def text_not_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("text no puede estar vacío")
+        return value
+
+
+class EmbedTextResponse(BaseModel):
+    embedding_model: str
+    dimensions: int
+    text: str
+    vector: list[float]
